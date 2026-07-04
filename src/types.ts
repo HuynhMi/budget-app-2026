@@ -9,6 +9,8 @@ export interface Wallet {
   createdAt: number
   /** Nếu true: ví này (vd tiết kiệm) KHÔNG cộng vào "tiền có thể chi tiêu" */
   excludeFromTotal?: boolean
+  /** Thứ tự hiển thị do người dùng kéo sắp xếp (nhỏ -> trước) */
+  order?: number
 }
 
 export interface Category {

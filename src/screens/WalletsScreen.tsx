@@ -5,6 +5,7 @@ import { formatVND, parseVND } from '../lib/money'
 import { todayISO } from '../lib/dates'
 import { Sheet } from '../components/Sheet'
 import { IconPicker, ColorPicker, WALLET_ICONS } from '../components/Pickers'
+import { ReorderableWallets } from '../components/ReorderableWallets'
 import { exportJSON, importJSON, resetAll } from '../db'
 import type { Wallet } from '../types'
 import type { Screen } from '../App'
@@ -30,29 +31,13 @@ export function WalletsScreen({ onNavigate }: { onNavigate: (s: Screen) => void 
         {hasExcluded && <> · Tiết kiệm: <b className="text-ink">{formatVND(savings)}</b></>}
       </div>
 
-      <div className="grid gap-3">
-        {store.wallets.map((w) => (
-          <button
-            key={w.id}
-            onClick={() => setEditing(w)}
-            className="rounded-3xl p-4 text-white shadow-soft text-left active:scale-[0.99] transition-transform"
-            style={{ background: `linear-gradient(135deg, ${w.color}, ${w.color}bb)` }}
-          >
-            <div className="flex items-center justify-between">
-              <div className="text-2xl">{w.icon}</div>
-              {w.excludeFromTotal ? (
-                <div className="text-[10px] bg-white/25 rounded-full px-2 py-0.5">🔒 Tiết kiệm</div>
-              ) : (
-                <div className="text-xs opacity-80">Sửa ›</div>
-              )}
-            </div>
-            <div className="mt-3 opacity-90">{w.name}</div>
-            <div className="text-2xl font-extrabold">
-              {formatVND(walletBalance(w, store.transactions, store.transfers))}
-            </div>
-          </button>
-        ))}
-      </div>
+      <p className="text-xs text-muted mb-2">Giữ ⠿ và kéo để sắp xếp lại thứ tự ví.</p>
+      <ReorderableWallets
+        wallets={store.wallets}
+        balanceOf={(w) => walletBalance(w, store.transactions, store.transfers)}
+        onEdit={(w) => setEditing(w)}
+        onReorder={(ids) => store.reorderWallets(ids)}
+      />
 
       <div className="flex gap-3 mt-4">
         <button onClick={() => setEditing('new')} className="btn-ghost flex-1">

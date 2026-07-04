@@ -8,6 +8,7 @@ interface Store extends AppData {
   reload: () => Promise<void>
   saveWallet: (w: Omit<Wallet, 'id' | 'createdAt'> & { id?: string }) => Promise<void>
   removeWallet: (id: string) => Promise<void>
+  reorderWallets: (orderedIds: string[]) => Promise<void>
   saveCategory: (c: Omit<Category, 'id'> & { id?: string }) => Promise<void>
   removeCategory: (id: string) => Promise<void>
   saveTransaction: (t: Omit<Transaction, 'id' | 'createdAt'> & { id?: string }) => Promise<void>
@@ -26,6 +27,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const reload = async () => {
     const d = await loadAll()
+    // Sắp xếp ví theo order người dùng đặt (undefined xuống cuối, rồi theo createdAt)
+    d.wallets = d.wallets.slice().sort((a, b) => {
+      const oa = a.order ?? Number.MAX_SAFE_INTEGER
+      const ob = b.order ?? Number.MAX_SAFE_INTEGER
+      return oa === ob ? a.createdAt - b.createdAt : oa - ob
+    })
     setData(d)
     setReady(true)
   }
@@ -53,6 +60,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     removeWallet: async (id) => {
       await dbApi.delWallet(id)
+      await reload()
+    },
+    reorderWallets: async (orderedIds) => {
+      // Ghi lại order = vị trí mới cho từng ví, rồi reload 1 lần
+      for (let i = 0; i < orderedIds.length; i++) {
+        const w = data.wallets.find((x) => x.id === orderedIds[i])
+        if (w) await dbApi.putWallet({ ...w, order: i })
+      }
       await reload()
     },
     saveCategory: async (c) => {
