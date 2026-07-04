@@ -1,0 +1,165 @@
+2026-07-04T16:12:21.046Z	Initializing build environment...
+2026-07-04T16:12:23.804Z	Success: Finished initializing build environment
+2026-07-04T16:12:24.420Z	Cloning repository...
+2026-07-04T16:12:26.451Z	Restoring from dependencies cache
+2026-07-04T16:12:26.460Z	Restoring from build output cache
+2026-07-04T16:12:26.468Z	Detected the following tools from environment: npm@10.9.2, nodejs@22.16.0
+2026-07-04T16:12:26.624Z	Installing project dependencies: npm clean-install --progress=false
+2026-07-04T16:12:32.295Z	npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+2026-07-04T16:12:33.469Z	npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-07-04T16:12:33.482Z	npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-07-04T16:12:34.328Z	npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+2026-07-04T16:12:37.078Z	npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+2026-07-04T16:12:38.600Z	
+2026-07-04T16:12:38.600Z	added 510 packages, and audited 511 packages in 10s
+2026-07-04T16:12:38.600Z	
+2026-07-04T16:12:38.600Z	117 packages are looking for funding
+2026-07-04T16:12:38.601Z	  run `npm fund` for details
+2026-07-04T16:12:38.601Z	
+2026-07-04T16:12:38.601Z	3 vulnerabilities (2 moderate, 1 high)
+2026-07-04T16:12:38.601Z	
+2026-07-04T16:12:38.601Z	To address all issues, run:
+2026-07-04T16:12:38.602Z	  npm audit fix
+2026-07-04T16:12:38.602Z	
+2026-07-04T16:12:38.602Z	Run `npm audit` for details.
+2026-07-04T16:12:38.822Z	Executing user build command: npm run build
+2026-07-04T16:12:39.241Z	
+2026-07-04T16:12:39.241Z	> quan-ly-chi-tieu@1.0.0 build
+2026-07-04T16:12:39.241Z	> vite build
+2026-07-04T16:12:39.241Z	
+2026-07-04T16:12:39.613Z	vite v6.4.3 building for production...
+2026-07-04T16:12:40.069Z	transforming...
+2026-07-04T16:12:46.835Z	✓ 928 modules transformed.
+2026-07-04T16:12:47.295Z	rendering chunks...
+2026-07-04T16:12:47.709Z	computing gzip size...
+2026-07-04T16:12:47.747Z	dist/registerSW.js                0.13 kB
+2026-07-04T16:12:47.747Z	dist/manifest.webmanifest         0.62 kB
+2026-07-04T16:12:47.748Z	dist/index.html                   0.96 kB │ gzip:   0.51 kB
+2026-07-04T16:12:47.748Z	dist/assets/index-C8AepFWC.css   23.97 kB │ gzip:   4.95 kB
+2026-07-04T16:12:47.748Z	dist/assets/index-BXvXpy50.js    17.42 kB │ gzip:   7.40 kB
+2026-07-04T16:12:47.748Z	dist/assets/index-DD9CTm96.js   416.03 kB │ gzip: 108.70 kB
+2026-07-04T16:12:47.749Z	dist/assets/index-DRpHpByn.js   600.94 kB │ gzip: 173.79 kB
+2026-07-04T16:12:47.750Z	✓ built in 8.10s
+2026-07-04T16:12:47.751Z	
+2026-07-04T16:12:47.751Z	(!) Some chunks are larger than 500 kB after minification. Consider:
+2026-07-04T16:12:47.751Z	- Using dynamic import() to code-split the application
+2026-07-04T16:12:47.751Z	- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-07-04T16:12:47.752Z	- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2026-07-04T16:12:50.771Z	
+2026-07-04T16:12:50.772Z	PWA v0.21.2
+2026-07-04T16:12:50.772Z	mode      generateSW
+2026-07-04T16:12:50.772Z	precache  11 entries (1036.85 KiB)
+2026-07-04T16:12:50.773Z	files generated
+2026-07-04T16:12:50.773Z	  dist/sw.js
+2026-07-04T16:12:50.773Z	  dist/workbox-5ffe50d4.js
+2026-07-04T16:12:50.881Z	Success: Build command completed
+2026-07-04T16:12:51.042Z	Executing user deploy command: npx wrangler deploy
+2026-07-04T16:12:52.891Z	npm warn exec The following package was not found and will be installed: wrangler@4.107.0
+2026-07-04T16:13:05.447Z	
+2026-07-04T16:13:05.448Z	 ⛅️ wrangler 4.107.0
+2026-07-04T16:13:05.448Z	────────────────────
+2026-07-04T16:13:06.048Z	
+2026-07-04T16:13:06.049Z	Detected Project Settings:
+2026-07-04T16:13:06.050Z	 - Worker Name: budget-app-2026
+2026-07-04T16:13:06.050Z	 - Framework: Vite
+2026-07-04T16:13:06.051Z	 - Build Command: npm run build
+2026-07-04T16:13:06.056Z	 - Output Directory: dist
+2026-07-04T16:13:06.056Z	
+2026-07-04T16:13:06.056Z	? Do you want to modify these settings?
+2026-07-04T16:13:06.056Z	🤖 Using fallback value in non-interactive context: no
+2026-07-04T16:13:06.071Z	
+2026-07-04T16:13:06.071Z	📦 Install packages:
+2026-07-04T16:13:06.076Z	 - wrangler (devDependency)
+2026-07-04T16:13:06.076Z	
+2026-07-04T16:13:06.076Z	📝 Update package.json scripts:
+2026-07-04T16:13:06.076Z	 - "deploy": "npm run build && wrangler deploy"
+2026-07-04T16:13:06.076Z	 - "preview": "npm run build && wrangler dev"
+2026-07-04T16:13:06.077Z	
+2026-07-04T16:13:06.077Z	📄 Create wrangler.jsonc:
+2026-07-04T16:13:06.077Z	  {
+2026-07-04T16:13:06.077Z	    "$schema": "node_modules/wrangler/config-schema.json",
+2026-07-04T16:13:06.077Z	    "name": "budget-app-2026",
+2026-07-04T16:13:06.077Z	    "compatibility_date": "2026-07-04",
+2026-07-04T16:13:06.077Z	    "observability": {
+2026-07-04T16:13:06.078Z	      "enabled": true
+2026-07-04T16:13:06.078Z	    },
+2026-07-04T16:13:06.078Z	    "assets": {
+2026-07-04T16:13:06.078Z	      "not_found_handling": "single-page-application"
+2026-07-04T16:13:06.078Z	    },
+2026-07-04T16:13:06.078Z	    "compatibility_flags": [
+2026-07-04T16:13:06.078Z	      "nodejs_compat"
+2026-07-04T16:13:06.078Z	    ]
+2026-07-04T16:13:06.078Z	  }
+2026-07-04T16:13:06.078Z	
+2026-07-04T16:13:06.090Z	🛠️  Configuring project for Vite
+2026-07-04T16:13:06.090Z	
+2026-07-04T16:13:06.090Z	? Proceed with setup?
+2026-07-04T16:13:06.091Z	🤖 Using fallback value in non-interactive context: yes
+2026-07-04T16:13:17.445Z	├ Adding Wrangler files to the .gitignore file
+2026-07-04T16:13:17.448Z	│ updated .gitignore file
+2026-07-04T16:13:17.448Z	│
+2026-07-04T16:13:17.448Z	[build] Running: npm run build
+2026-07-04T16:13:17.676Z	[build] 
+2026-07-04T16:13:17.677Z	[build] > quan-ly-chi-tieu@1.0.0 build
+2026-07-04T16:13:17.677Z	[build] > vite build
+2026-07-04T16:13:17.677Z	[build] 
+2026-07-04T16:13:17.678Z	[build] 
+2026-07-04T16:13:19.650Z	[build] vite v6.4.3 building for production...
+2026-07-04T16:13:19.650Z	[build] 
+2026-07-04T16:13:19.715Z	[build] transforming...
+2026-07-04T16:13:19.716Z	[build] 
+2026-07-04T16:13:26.558Z	[build] ✓ 928 modules transformed.
+2026-07-04T16:13:26.558Z	[build] 
+2026-07-04T16:13:27.059Z	[build] rendering chunks...
+2026-07-04T16:13:27.064Z	[build] 
+2026-07-04T16:13:27.486Z	[build] computing gzip size...
+2026-07-04T16:13:27.498Z	[build] 
+2026-07-04T16:13:27.517Z	[build] dist/.assetsignore                0.02 kB
+2026-07-04T16:13:27.518Z	[build] dist/registerSW.js                0.13 kB
+2026-07-04T16:13:27.519Z	[build] 
+2026-07-04T16:13:27.520Z	[build] dist/manifest.webmanifest         0.62 kB
+2026-07-04T16:13:27.520Z	[build] dist/index.html                   0.96 kB │ gzip:   0.51 kB
+2026-07-04T16:13:27.520Z	[build] dist/wrangler.json                1.24 kB │ gzip:   0.63 kB
+2026-07-04T16:13:27.520Z	[build] dist/assets/index-C8AepFWC.css   23.97 kB │ gzip:   4.95 kB
+2026-07-04T16:13:27.520Z	[build] dist/assets/index-BXvXpy50.js    17.42 kB │ gzip:   7.40 kB
+2026-07-04T16:13:27.521Z	[build] dist/assets/index-DD9CTm96.js   416.03 kB │ gzip: 108.70 kB
+2026-07-04T16:13:27.522Z	[build] dist/assets/index-DRpHpByn.js   600.94 kB │ gzip: 173.79 kB
+2026-07-04T16:13:27.522Z	[build] ✓ built in 7.85s
+2026-07-04T16:13:27.522Z	[build] 
+2026-07-04T16:13:27.523Z	[build] 
+2026-07-04T16:13:27.523Z	[build] (!) Some chunks are larger than 500 kB after minification. Consider:
+2026-07-04T16:13:27.524Z	[build] - Using dynamic import() to code-split the application
+2026-07-04T16:13:27.524Z	[build] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-07-04T16:13:27.524Z	[build] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2026-07-04T16:13:27.524Z	[build] 
+2026-07-04T16:13:30.414Z	[build] 
+2026-07-04T16:13:30.416Z	[build] PWA v0.21.2
+2026-07-04T16:13:30.417Z	[build] mode      generateSW
+2026-07-04T16:13:30.419Z	[build] precache  11 entries (1036.85 KiB)
+2026-07-04T16:13:30.420Z	[build] files generated
+2026-07-04T16:13:30.421Z	[build]   dist/sw.js
+2026-07-04T16:13:30.421Z	[build]   dist/workbox-5ffe50d4.js
+2026-07-04T16:13:30.421Z	[build] 
+2026-07-04T16:13:30.548Z	Using redirected Wrangler configuration.
+2026-07-04T16:13:30.548Z	 - Configuration being used: "dist/wrangler.json"
+2026-07-04T16:13:30.548Z	 - Original user's configuration: "wrangler.jsonc"
+2026-07-04T16:13:30.548Z	 - Deploy configuration file: ".wrangler/deploy/config.json"
+2026-07-04T16:13:31.348Z	🌀 Building list of assets...
+2026-07-04T16:13:31.349Z	✨ Read 19 files from the assets directory /opt/buildhome/repo/dist
+2026-07-04T16:13:31.368Z	🌀 Starting asset upload...
+2026-07-04T16:13:33.222Z	No updated asset files to upload. Proceeding with deployment...
+2026-07-04T16:13:33.224Z	Total Upload: 0.33 KiB / gzip: 0.24 KiB
+2026-07-04T16:13:33.356Z	
+2026-07-04T16:13:33.356Z	Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+2026-07-04T16:13:33.357Z	
+2026-07-04T16:13:33.425Z	✘ [ERROR] A request to the Cloudflare API (/accounts/8317db0b38f7961a6e96cd15dedc04ab/workers/scripts/budget-app-2026/versions) failed.
+2026-07-04T16:13:33.426Z	
+2026-07-04T16:13:33.426Z	  Invalid _redirects configuration:
+2026-07-04T16:13:33.426Z	  Line 1: Infinite loop detected in this rule. This would cause a redirect to strip `.html` or `/index` and end up triggering this rule again. [code: 100324]
+2026-07-04T16:13:33.427Z	
+2026-07-04T16:13:33.427Z	  
+2026-07-04T16:13:33.427Z	  If you think this is a bug, please open an issue at: https://github.com/cloudflare/workers-sdk/issues/new/choose
+2026-07-04T16:13:33.428Z	
+2026-07-04T16:13:33.428Z	
+2026-07-04T16:13:33.439Z	🪵  Logs were written to "/opt/buildhome/.config/.wrangler/logs/wrangler-2026-07-04_16-13-04_855.log"
+2026-07-04T16:13:33.519Z	Failed: error occurred while running deploy command
