@@ -10,6 +10,8 @@ import {
   startOfYear,
   inRange
 } from '../lib/dates'
+import { budgetStatus } from '../lib/budget'
+import type { Screen } from '../App'
 
 const PERIODS: Array<{ key: Period; label: string }> = [
   { key: 'week', label: 'Tuần' },
@@ -17,7 +19,7 @@ const PERIODS: Array<{ key: Period; label: string }> = [
   { key: 'year', label: 'Năm' }
 ]
 
-export function ReportsScreen() {
+export function ReportsScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
   const store = useStore()
   const [period, setPeriod] = useState<Period>('month')
   const now = new Date()
@@ -51,6 +53,9 @@ export function ReportsScreen() {
           </button>
         ))}
       </div>
+
+      {/* Ngân sách theo danh mục */}
+      <BudgetCard onOpen={() => onNavigate('budget')} />
 
       {/* Tổng thu chi */}
       <div className="flex gap-3 mb-4">
@@ -89,7 +94,7 @@ export function ReportsScreen() {
         </div>
       </div>
 
-      {/* Theo danh mục */}
+      {/* Theo danh mục (tổng cho kỳ đang chọn) */}
       <div className="card p-4">
         <h2 className="font-bold mb-3">Chi tiêu theo danh mục</h2>
         {catSlices.length === 0 && <div className="text-muted text-sm py-4 text-center">Chưa có chi tiêu.</div>}
@@ -114,5 +119,35 @@ export function ReportsScreen() {
         </div>
       </div>
     </div>
+  )
+}
+
+function BudgetCard({ onOpen }: { onOpen: () => void }) {
+  const store = useStore()
+  const now = new Date()
+  const statuses = store.budgets.map((b) => budgetStatus(b, store.transactions, now))
+  const overCount = statuses.filter((s) => s.level === 'over').length
+  const warnCount = statuses.filter((s) => s.level === 'warn').length
+
+  return (
+    <button onClick={onOpen} className="card p-4 w-full text-left mb-4 active:scale-[0.99] transition-transform">
+      <div className="flex items-center justify-between">
+        <h2 className="font-bold flex items-center gap-2">🎯 Ngân sách danh mục</h2>
+        <span className="text-sm text-brand-500 font-medium">Quản lý ›</span>
+      </div>
+      {statuses.length === 0 ? (
+        <p className="text-xs text-muted mt-1">Đặt hạn mức để không tiêu lố cho từng danh mục.</p>
+      ) : (
+        <div className="flex gap-2 mt-2 flex-wrap">
+          <span className="text-xs bg-brand-50 text-brand-600 rounded-full px-3 py-1">{statuses.length} hạn mức</span>
+          {overCount > 0 && (
+            <span className="text-xs bg-red-50 text-red-500 rounded-full px-3 py-1">⚠️ {overCount} vượt mức</span>
+          )}
+          {warnCount > 0 && (
+            <span className="text-xs bg-orange-50 text-orange-500 rounded-full px-3 py-1">{warnCount} sắp hết</span>
+          )}
+        </div>
+      )}
+    </button>
   )
 }

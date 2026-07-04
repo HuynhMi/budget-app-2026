@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Sheet } from '../components/Sheet'
 import { useStore } from '../state/store'
 import { parseVND, formatVND } from '../lib/money'
-import { todayISO } from '../lib/dates'
+import { todayISO, parseISO } from '../lib/dates'
+import { spentInPeriod } from '../lib/budget'
 import type { TxType } from '../types'
 
 interface Props {
@@ -45,6 +46,26 @@ export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) 
   }, [type, store.categories])
 
   const amount = parseVND(amountStr)
+
+  // Cảnh báo hạn mức: nếu là chi và danh mục có hạn mức
+  const budgetWarn = useMemo(() => {
+    if (type !== 'expense' || !categoryId) return null
+    const b = store.budgets.find((x) => x.categoryId === categoryId)
+    if (!b) return null
+    const ref = date ? parseISO(date) : new Date()
+    const already = spentInPeriod(categoryId, b.period, store.transactions, ref)
+    const after = already + amount
+    if (after <= b.limit) {
+      if (already >= b.limit * 0.8) {
+        return { level: 'warn' as const, text: `Sắp chạm hạn mức: ${formatVND(after)} / ${formatVND(b.limit)} ${b.period === 'month' ? 'tháng' : 'tuần'} này` }
+      }
+      return null
+    }
+    return {
+      level: 'over' as const,
+      text: `Vượt hạn mức ${b.period === 'month' ? 'tháng' : 'tuần'}! ${formatVND(after)} / ${formatVND(b.limit)} (dư ${formatVND(after - b.limit)})`
+    }
+  }, [type, categoryId, amount, date, store.budgets, store.transactions])
 
   const submit = async () => {
     if (amount <= 0) return setError('Nhập số tiền hợp lệ')
@@ -146,6 +167,16 @@ export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) 
         ))}
       </div>
 
+      {budgetWarn && (
+        <div
+          className={`rounded-2xl px-4 py-3 mb-3 text-sm font-medium ${
+            budgetWarn.level === 'over' ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-600'
+          }`}
+        >
+          {budgetWarn.level === 'over' ? '🚫 ' : '⚠️ '}
+          {budgetWarn.text}
+        </div>
+      )}
       {error && <div className="text-pinkish-500 text-sm mb-3 text-center">{error}</div>}
       <button className="btn-primary" onClick={submit}>
         Lưu giao dịch

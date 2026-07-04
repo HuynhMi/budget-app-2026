@@ -39,9 +39,19 @@ export interface Transfer {
   createdAt: number
 }
 
+export type BudgetPeriod = 'month' | 'week'
+
+export interface Budget {
+  id: string
+  categoryId: string
+  period: BudgetPeriod
+  limit: number
+}
+
 export interface AppData {
   wallets: Wallet[]
   categories: Category[]
   transactions: Transaction[]
   transfers: Transfer[]
+  budgets: Budget[]
 }

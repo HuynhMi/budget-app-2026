@@ -1,22 +1,27 @@
 import { openDB, type IDBPDatabase } from 'idb'
-import type { AppData, Wallet, Category, Transaction, Transfer } from '../types'
+import type { AppData, Wallet, Category, Transaction, Transfer, Budget } from '../types'
 import { defaultCategories, defaultWallets } from './seed'
 
 const DB_NAME = 'chi-tieu-db'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
-type Stores = 'wallets' | 'categories' | 'transactions' | 'transfers'
+type Stores = 'wallets' | 'categories' | 'transactions' | 'transfers' | 'budgets'
 
 let dbPromise: Promise<IDBPDatabase> | null = null
 
 function getDB() {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        db.createObjectStore('wallets', { keyPath: 'id' })
-        db.createObjectStore('categories', { keyPath: 'id' })
-        db.createObjectStore('transactions', { keyPath: 'id' })
-        db.createObjectStore('transfers', { keyPath: 'id' })
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          db.createObjectStore('wallets', { keyPath: 'id' })
+          db.createObjectStore('categories', { keyPath: 'id' })
+          db.createObjectStore('transactions', { keyPath: 'id' })
+          db.createObjectStore('transfers', { keyPath: 'id' })
+        }
+        if (oldVersion < 2) {
+          db.createObjectStore('budgets', { keyPath: 'id' })
+        }
       }
     })
   }
@@ -30,6 +35,7 @@ export async function loadAll(): Promise<AppData> {
   let categories = (await db.getAll('categories')) as Category[]
   const transactions = (await db.getAll('transactions')) as Transaction[]
   const transfers = (await db.getAll('transfers')) as Transfer[]
+  const budgets = (await db.getAll('budgets')) as Budget[]
 
   if (categories.length === 0) {
     categories = defaultCategories()
@@ -43,7 +49,7 @@ export async function loadAll(): Promise<AppData> {
     for (const w of wallets) await tx.store.put(w)
     await tx.done
   }
-  return { wallets, categories, transactions, transfers }
+  return { wallets, categories, transactions, transfers, budgets }
 }
 
 async function put<T>(store: Stores, value: T): Promise<void> {
@@ -64,7 +70,9 @@ export const dbApi = {
   putTransaction: (t: Transaction) => put('transactions', t),
   delTransaction: (id: string) => del('transactions', id),
   putTransfer: (t: Transfer) => put('transfers', t),
-  delTransfer: (id: string) => del('transfers', id)
+  delTransfer: (id: string) => del('transfers', id),
+  putBudget: (b: Budget) => put('budgets', b),
+  delBudget: (id: string) => del('budgets', id)
 }
 
 /** Xuất toàn bộ dữ liệu ra chuỗi JSON để backup */
@@ -77,7 +85,7 @@ export async function exportJSON(): Promise<string> {
 export async function importJSON(json: string): Promise<void> {
   const data = JSON.parse(json) as AppData
   const db = await getDB()
-  for (const store of ['wallets', 'categories', 'transactions', 'transfers'] as Stores[]) {
+  for (const store of ['wallets', 'categories', 'transactions', 'transfers', 'budgets'] as Stores[]) {
     const tx = db.transaction(store, 'readwrite')
     await tx.store.clear()
     await tx.done
@@ -91,4 +99,5 @@ export async function importJSON(json: string): Promise<void> {
   await write('categories', data.categories ?? [])
   await write('transactions', data.transactions ?? [])
   await write('transfers', data.transfers ?? [])
+  await write('budgets', data.budgets ?? [])
 }

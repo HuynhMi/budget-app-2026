@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import type { AppData, Wallet, Category, Transaction, Transfer } from '../types'
+import type { AppData, Wallet, Category, Transaction, Transfer, Budget } from '../types'
 import { loadAll, dbApi } from '../db'
 import { uid } from '../lib/uid'
 
@@ -14,12 +14,14 @@ interface Store extends AppData {
   removeTransaction: (id: string) => Promise<void>
   saveTransfer: (t: Omit<Transfer, 'id' | 'createdAt'> & { id?: string }) => Promise<void>
   removeTransfer: (id: string) => Promise<void>
+  saveBudget: (b: Omit<Budget, 'id'> & { id?: string }) => Promise<void>
+  removeBudget: (id: string) => Promise<void>
 }
 
 const StoreContext = createContext<Store | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<AppData>({ wallets: [], categories: [], transactions: [], transfers: [] })
+  const [data, setData] = useState<AppData>({ wallets: [], categories: [], transactions: [], transfers: [], budgets: [] })
   const [ready, setReady] = useState(false)
 
   const reload = async () => {
@@ -95,6 +97,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     removeTransfer: async (id) => {
       await dbApi.delTransfer(id)
+      await reload()
+    },
+    saveBudget: async (b) => {
+      const budget: Budget = {
+        id: b.id ?? uid(),
+        categoryId: b.categoryId,
+        period: b.period,
+        limit: b.limit
+      }
+      await dbApi.putBudget(budget)
+      await reload()
+    },
+    removeBudget: async (id) => {
+      await dbApi.delBudget(id)
       await reload()
     }
   }

@@ -7,9 +7,10 @@ import { ReportsScreen } from './screens/ReportsScreen'
 import { WalletsScreen } from './screens/WalletsScreen'
 import { CategoriesScreen } from './screens/CategoriesScreen'
 import { ScanScreen } from './screens/ScanScreen'
+import { BudgetScreen } from './screens/BudgetScreen'
 import { AddTransactionSheet } from './screens/AddTransactionSheet'
 
-export type Screen = 'home' | 'history' | 'reports' | 'wallets' | 'categories' | 'scan'
+export type Screen = 'home' | 'history' | 'reports' | 'wallets' | 'categories' | 'scan' | 'budget'
 
 function Shell() {
   const store = useStore()
@@ -28,12 +29,13 @@ function Shell() {
     <div className="app-shell min-h-screen">
       {screen === 'home' && <HomeScreen onNavigate={setScreen} onAdd={() => setAddOpen(true)} />}
       {screen === 'history' && <HistoryScreen />}
-      {screen === 'reports' && <ReportsScreen />}
+      {screen === 'reports' && <ReportsScreen onNavigate={setScreen} />}
       {screen === 'wallets' && <WalletsScreen onNavigate={setScreen} />}
       {screen === 'categories' && <CategoriesScreen onBack={() => setScreen('wallets')} />}
       {screen === 'scan' && <ScanScreen onBack={() => setScreen('home')} />}
+      {screen === 'budget' && <BudgetScreen onBack={() => setScreen('reports')} />}
 
-      {screen !== 'scan' && screen !== 'categories' && (
+      {screen !== 'scan' && screen !== 'categories' && screen !== 'budget' && (
         <BottomNav current={screen} onNavigate={setScreen} onAdd={() => setAddOpen(true)} />
       )}
 
