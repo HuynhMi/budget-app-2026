@@ -117,11 +117,26 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
               <span className="text-brand-500 font-medium"> Đặt hạn mức chi</span> cho danh mục để theo dõi ngay đây.
             </button>
           ) : (
-            <div className="space-y-4">
-              {budgetStatuses.map((s) => (
-                <BudgetProgressRow key={s.budget.id} status={s} category={categoryById(store.categories, s.budget.categoryId)} />
-              ))}
-            </div>
+            <>
+              <div className="space-y-3">
+                {budgetStatuses.slice(0, 4).map((s) => (
+                  <BudgetProgressRow
+                    key={s.budget.id}
+                    status={s}
+                    category={categoryById(store.categories, s.budget.categoryId)}
+                    compact
+                  />
+                ))}
+              </div>
+              {budgetStatuses.length > 4 && (
+                <button
+                  onClick={() => onNavigate('budget')}
+                  className="w-full text-center text-sm text-brand-500 font-medium mt-3 pt-1"
+                >
+                  Xem tất cả {budgetStatuses.length} hạn mức ›
+                </button>
+              )}
+            </>
           )}
         </div>
 
