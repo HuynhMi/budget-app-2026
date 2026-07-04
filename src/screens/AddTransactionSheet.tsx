@@ -4,18 +4,21 @@ import { useStore } from '../state/store'
 import { parseVND, formatVND } from '../lib/money'
 import { todayISO, parseISO } from '../lib/dates'
 import { spentInPeriod } from '../lib/budget'
-import type { TxType } from '../types'
+import type { TxType, Transaction } from '../types'
 
 interface Props {
   open: boolean
   onClose: () => void
   /** Giá trị điền sẵn (vd từ màn hình quét) */
   prefill?: { name?: string; amount?: number; type?: TxType }
+  /** Nếu có: chế độ sửa giao dịch đã tồn tại */
+  editTxn?: Transaction
   onSaved?: () => void
 }
 
-export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) {
+export function AddTransactionSheet({ open, onClose, prefill, editTxn, onSaved }: Props) {
   const store = useStore()
+  const isEdit = !!editTxn
   const [type, setType] = useState<TxType>('expense')
   const [name, setName] = useState('')
   const [amountStr, setAmountStr] = useState('')
@@ -29,11 +32,20 @@ export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) 
   // Khởi tạo khi mở
   useEffect(() => {
     if (open) {
-      setType(prefill?.type ?? 'expense')
-      setName(prefill?.name ?? '')
-      setAmountStr(prefill?.amount ? String(prefill.amount) : '')
-      setDate(todayISO())
-      setWalletId(store.wallets[0]?.id ?? '')
+      if (editTxn) {
+        setType(editTxn.type)
+        setName(editTxn.name)
+        setAmountStr(String(editTxn.amount))
+        setDate(editTxn.date)
+        setWalletId(editTxn.walletId)
+        setCategoryId(editTxn.categoryId)
+      } else {
+        setType(prefill?.type ?? 'expense')
+        setName(prefill?.name ?? '')
+        setAmountStr(prefill?.amount ? String(prefill.amount) : '')
+        setDate(todayISO())
+        setWalletId(store.wallets[0]?.id ?? '')
+      }
       setError('')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -53,7 +65,9 @@ export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) 
     const b = store.budgets.find((x) => x.categoryId === categoryId)
     if (!b) return null
     const ref = date ? parseISO(date) : new Date()
-    const already = spentInPeriod(categoryId, b.period, store.transactions, ref)
+    // Khi sửa: loại chính giao dịch đang sửa khỏi "đã chi" để không cộng trùng
+    const others = editTxn ? store.transactions.filter((t) => t.id !== editTxn.id) : store.transactions
+    const already = spentInPeriod(categoryId, b.period, others, ref)
     const after = already + amount
     if (after <= b.limit) {
       if (already >= b.limit * 0.8) {
@@ -72,6 +86,7 @@ export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) 
     if (!walletId) return setError('Chọn ví')
     if (!categoryId) return setError('Chọn danh mục')
     await store.saveTransaction({
+      id: editTxn?.id,
       type,
       name: name.trim() || (type === 'expense' ? 'Chi tiêu' : 'Thu nhập'),
       amount,
@@ -83,8 +98,16 @@ export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) 
     onSaved?.()
   }
 
+  const remove = async () => {
+    if (!editTxn) return
+    if (!confirm('Xoá giao dịch này?')) return
+    await store.removeTransaction(editTxn.id)
+    onClose()
+    onSaved?.()
+  }
+
   return (
-    <Sheet open={open} onClose={onClose} title="Thêm giao dịch">
+    <Sheet open={open} onClose={onClose} title={isEdit ? 'Sửa giao dịch' : 'Thêm giao dịch'}>
       {/* Chọn loại */}
       <div className="grid grid-cols-2 gap-2 bg-brand-50 p-1 rounded-2xl mb-4">
         <button
@@ -179,8 +202,13 @@ export function AddTransactionSheet({ open, onClose, prefill, onSaved }: Props) 
       )}
       {error && <div className="text-pinkish-500 text-sm mb-3 text-center">{error}</div>}
       <button className="btn-primary" onClick={submit}>
-        Lưu giao dịch
+        {isEdit ? 'Lưu thay đổi' : 'Lưu giao dịch'}
       </button>
+      {isEdit && (
+        <button className="w-full py-3 mt-1 text-pinkish-500 font-medium" onClick={remove}>
+          Xoá giao dịch
+        </button>
+      )}
     </Sheet>
   )
 }

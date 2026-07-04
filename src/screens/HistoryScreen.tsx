@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../state/store'
 import { TxnRow, categoryById, walletById } from '../components/TxnRow'
-import { Sheet } from '../components/Sheet'
-import { formatVND, parseVND } from '../lib/money'
+import { AddTransactionSheet } from './AddTransactionSheet'
 import {
   parseISO,
   startOfWeek,
@@ -158,7 +157,11 @@ export function HistoryScreen() {
         ))}
       </div>
 
-      {editing && <EditTxnSheet txn={editing} onClose={() => setEditing(null)} />}
+      <AddTransactionSheet
+        open={!!editing}
+        editTxn={editing ?? undefined}
+        onClose={() => setEditing(null)}
+      />
     </div>
   )
 }
@@ -167,41 +170,4 @@ function formatDateVi(iso: string): string {
   const d = parseISO(iso)
   if (iso === todayISO()) return 'Hôm nay'
   return `${['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
-}
-
-function EditTxnSheet({ txn, onClose }: { txn: Transaction; onClose: () => void }) {
-  const store = useStore()
-  const [name, setName] = useState(txn.name)
-  const [amountStr, setAmountStr] = useState(String(txn.amount))
-  const [date, setDate] = useState(txn.date)
-
-  const save = async () => {
-    const amount = parseVND(amountStr)
-    if (amount <= 0) return
-    await store.saveTransaction({ ...txn, name: name.trim() || txn.name, amount, date })
-    onClose()
-  }
-  const remove = async () => {
-    if (!confirm('Xoá giao dịch này?')) return
-    await store.removeTransaction(txn.id)
-    onClose()
-  }
-
-  return (
-    <Sheet open onClose={onClose} title="Sửa giao dịch">
-      <div className="text-center mb-4">
-        <span className={`text-sm font-semibold ${txn.type === 'income' ? 'text-green-600' : 'text-pinkish-500'}`}>
-          {txn.type === 'income' ? 'Thu nhập' : 'Chi tiêu'} · {formatVND(txn.amount)}
-        </span>
-      </div>
-      <label className="block text-sm font-medium text-muted mb-1.5">Tên</label>
-      <input className="field mb-4" value={name} onChange={(e) => setName(e.target.value)} />
-      <label className="block text-sm font-medium text-muted mb-1.5">Số tiền</label>
-      <input inputMode="numeric" className="field mb-4" value={amountStr} onChange={(e) => setAmountStr(e.target.value)} />
-      <label className="block text-sm font-medium text-muted mb-1.5">Ngày</label>
-      <input type="date" className="field mb-5" value={date} onChange={(e) => setDate(e.target.value)} />
-      <button className="btn-primary mb-2" onClick={save}>Lưu</button>
-      <button className="w-full py-3 text-pinkish-500 font-medium" onClick={remove}>Xoá giao dịch</button>
-    </Sheet>
-  )
 }
