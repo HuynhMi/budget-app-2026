@@ -26,6 +26,13 @@ function trim(v: number): string {
   return (Math.round(v * 10) / 10).toString().replace('.', ',')
 }
 
+/** Nhóm hàng nghìn khi người dùng gõ: "2400000" -> "2.400.000". Bỏ ký tự không phải số. */
+export function groupDigits(s: string): string {
+  const digits = (s ?? '').replace(/\D/g, '')
+  if (!digits) return ''
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
 /** Chuyển chuỗi người dùng nhập ("1.500.000", "1500000", "1,5tr") thành số nguyên VND */
 export function parseVND(s: string): number {
   if (!s) return 0

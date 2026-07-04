@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../state/store'
 import { Sheet } from '../components/Sheet'
 import { BudgetProgressRow } from '../components/BudgetProgressRow'
+import { MoneyInput } from '../components/MoneyInput'
 import { formatVND, parseVND } from '../lib/money'
 import { budgetStatus } from '../lib/budget'
 import type { Budget, BudgetPeriod, Category } from '../types'
@@ -143,12 +144,12 @@ function BudgetEditor({
       </div>
 
       <label className="block text-sm font-medium text-muted mb-1.5">Hạn mức tối đa</label>
-      <input
-        inputMode="numeric"
-        className="field text-xl font-bold mb-1"
-        placeholder="VD: 3000000"
+      <MoneyInput
+        className="field text-xl font-bold"
+        suffixClassName="text-lg"
+        placeholder="VD: 3.000.000"
         value={limitStr}
-        onChange={(e) => setLimitStr(e.target.value)}
+        onChange={setLimitStr}
       />
       <div className="text-right text-sm text-brand-500 font-medium mb-4 h-5">
         {parseVND(limitStr) > 0 ? `${formatVND(parseVND(limitStr))} / ${period === 'month' ? 'tháng' : 'tuần'}` : ''}

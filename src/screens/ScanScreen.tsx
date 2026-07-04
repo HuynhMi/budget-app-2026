@@ -3,6 +3,7 @@ import { useStore } from '../state/store'
 import { formatVND, parseVND } from '../lib/money'
 import { uid } from '../lib/uid'
 import { extractPrice } from '../lib/ocr'
+import { MoneyInput } from '../components/MoneyInput'
 import { AddTransactionSheet } from './AddTransactionSheet'
 
 interface CartItem {
@@ -90,13 +91,9 @@ export function ScanScreen({ onBack }: { onBack: () => void }) {
       <div className="px-5 pb-32 pt-4">
         {/* Hạn mức */}
         <label className="block text-sm font-medium text-muted mb-1.5">Hạn mức chi (tuỳ chọn)</label>
-        <input
-          inputMode="numeric"
-          className="field mb-4"
-          placeholder="VD: 500000"
-          value={budgetStr}
-          onChange={(e) => setBudgetStr(e.target.value)}
-        />
+        <div className="mb-4">
+          <MoneyInput placeholder="VD: 500.000" value={budgetStr} onChange={setBudgetStr} />
+        </div>
 
         {/* Thêm món */}
         <div className="card p-4 mb-4">
@@ -138,14 +135,9 @@ export function ScanScreen({ onBack }: { onBack: () => void }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            <input
-              inputMode="numeric"
-              className="field w-28"
-              placeholder="Giá"
-              value={priceStr}
-              onChange={(e) => setPriceStr(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addItem()}
-            />
+            <div className="w-32 shrink-0">
+              <MoneyInput className="field" placeholder="Giá" value={priceStr} onChange={setPriceStr} onEnter={addItem} />
+            </div>
           </div>
           <button className="btn-primary mt-3" onClick={addItem}>
             ＋ Thêm vào giỏ

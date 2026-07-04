@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Sheet } from '../components/Sheet'
+import { MoneyInput } from '../components/MoneyInput'
 import { useStore } from '../state/store'
 import { parseVND, formatVND } from '../lib/money'
 import { todayISO, parseISO } from '../lib/dates'
@@ -131,15 +132,14 @@ export function AddTransactionSheet({ open, onClose, prefill, editTxn, onSaved }
 
       {/* Số tiền */}
       <label className="block text-sm font-medium text-muted mb-1.5">Số tiền</label>
-      <input
-        inputMode="numeric"
-        className="field text-2xl font-bold mb-1"
-        placeholder="0"
-        value={amountStr}
-        onChange={(e) => setAmountStr(e.target.value)}
-      />
-      <div className="text-right text-sm text-brand-500 font-medium mb-4 h-5">
-        {amount > 0 ? formatVND(amount) : ''}
+      <div className="mb-4">
+        <MoneyInput
+          className="field text-2xl font-bold"
+          suffixClassName="text-xl"
+          placeholder="0"
+          value={amountStr}
+          onChange={setAmountStr}
+        />
       </div>
 
       {/* Tên */}

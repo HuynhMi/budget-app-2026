@@ -6,6 +6,7 @@ import { todayISO } from '../lib/dates'
 import { Sheet } from '../components/Sheet'
 import { IconPicker, ColorPicker, WALLET_ICONS } from '../components/Pickers'
 import { ReorderableWallets } from '../components/ReorderableWallets'
+import { MoneyInput } from '../components/MoneyInput'
 import { exportJSON, importJSON, resetAll } from '../db'
 import type { Wallet } from '../types'
 import type { Screen } from '../App'
@@ -168,7 +169,9 @@ function WalletEditor({ wallet, onClose }: { wallet: Wallet | null; onClose: () 
       <label className="block text-sm font-medium text-muted mb-1.5">
         {wallet ? 'Số dư ban đầu' : 'Số dư hiện có'}
       </label>
-      <input inputMode="numeric" className="field mb-4" value={balanceStr} onChange={(e) => setBalanceStr(e.target.value)} placeholder="0" />
+      <div className="mb-4">
+        <MoneyInput value={balanceStr} onChange={setBalanceStr} placeholder="0" />
+      </div>
 
       <label className="block text-sm font-medium text-muted mb-2">Biểu tượng</label>
       <div className="mb-4"><IconPicker icons={WALLET_ICONS} value={icon} onChange={setIcon} /></div>
@@ -240,7 +243,9 @@ function TransferSheet({ onClose }: { onClose: () => void }) {
       </select>
 
       <label className="block text-sm font-medium text-muted mb-1.5">Số tiền</label>
-      <input inputMode="numeric" className="field mb-4 text-xl font-bold" value={amountStr} onChange={(e) => setAmountStr(e.target.value)} placeholder="0" />
+      <div className="mb-4">
+        <MoneyInput className="field text-xl font-bold" suffixClassName="text-lg" value={amountStr} onChange={setAmountStr} placeholder="0" />
+      </div>
 
       {error && <div className="text-pinkish-500 text-sm mb-3 text-center">{error}</div>}
       <button className="btn-primary" onClick={save}>Chuyển</button>
