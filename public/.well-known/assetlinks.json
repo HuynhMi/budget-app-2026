@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.CHANGE_ME.chitieu",
+      "sha256_cert_fingerprints": [
+        "THAY_BANG_SHA256_FINGERPRINT_TU_PWABUILDER"
+      ]
+    }
+  }
+]
