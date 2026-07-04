@@ -1,15 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../state/store'
 import { Sheet } from '../components/Sheet'
+import { BudgetProgressRow } from '../components/BudgetProgressRow'
 import { formatVND, parseVND } from '../lib/money'
-import { budgetStatus, type BudgetStatus } from '../lib/budget'
+import { budgetStatus } from '../lib/budget'
 import type { Budget, BudgetPeriod, Category } from '../types'
-
-const LEVEL_COLOR: Record<BudgetStatus['level'], string> = {
-  ok: '#22c55e',
-  warn: '#f59e0b',
-  over: '#ef4444'
-}
 
 export function BudgetScreen({ onBack }: { onBack: () => void }) {
   const store = useStore()
@@ -45,51 +40,15 @@ export function BudgetScreen({ onBack }: { onBack: () => void }) {
         )}
 
         <div className="space-y-3">
-          {statuses.map((s) => {
-            const cat = catName(s.budget.categoryId)
-            const color = LEVEL_COLOR[s.level]
-            return (
-              <button
-                key={s.budget.id}
-                onClick={() => setEditing(s.budget)}
-                className="card p-4 w-full text-left active:scale-[0.99] transition-transform"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="h-10 w-10 rounded-2xl flex items-center justify-center text-xl"
-                      style={{ backgroundColor: (cat?.color ?? '#c084fc') + '22' }}
-                    >
-                      {cat?.icon ?? '🏷️'}
-                    </span>
-                    <div>
-                      <div className="font-bold">{cat?.name ?? 'Danh mục'}</div>
-                      <div className="text-xs text-muted">{s.budget.period === 'month' ? 'Mỗi tháng' : 'Mỗi tuần'}</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold" style={{ color }}>
-                      {formatVND(s.spent)}
-                    </div>
-                    <div className="text-xs text-muted">/ {formatVND(s.budget.limit)}</div>
-                  </div>
-                </div>
-                <div className="h-2.5 rounded-full bg-brand-50 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${Math.min(100, s.ratio * 100)}%`, backgroundColor: color }}
-                  />
-                </div>
-                <div className="text-xs mt-1.5 font-medium" style={{ color }}>
-                  {s.level === 'over'
-                    ? `⚠️ Vượt hạn mức ${formatVND(-s.remaining)}`
-                    : s.level === 'warn'
-                      ? `Sắp hết! Còn ${formatVND(s.remaining)}`
-                      : `Còn lại ${formatVND(s.remaining)}`}
-                </div>
-              </button>
-            )
-          })}
+          {statuses.map((s) => (
+            <button
+              key={s.budget.id}
+              onClick={() => setEditing(s.budget)}
+              className="card p-4 w-full text-left active:scale-[0.99] transition-transform"
+            >
+              <BudgetProgressRow status={s} category={catName(s.budget.categoryId)} />
+            </button>
+          ))}
         </div>
 
         <button

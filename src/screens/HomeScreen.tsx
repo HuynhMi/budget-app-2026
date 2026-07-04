@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, LabelList } from 'recharts'
 import { useStore } from '../state/store'
 import { walletBalance, spendableBalance, excludedBalance } from '../lib/balance'
-import { formatVND, formatShort } from '../lib/money'
-import { monthlyByCategory, sumTotals } from '../lib/aggregate'
-import { monthlyBudgetTotal } from '../lib/budget'
+import { formatVND } from '../lib/money'
+import { sumTotals } from '../lib/aggregate'
+import { budgetStatus } from '../lib/budget'
 import { startOfMonth, inRange } from '../lib/dates'
 import { TxnRow, categoryById, walletById } from '../components/TxnRow'
+import { BudgetProgressRow } from '../components/BudgetProgressRow'
 import type { Screen } from '../App'
 
 export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => void; onAdd: () => void }) {
@@ -25,11 +25,10 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
   )
   const { income, expense } = sumTotals(monthTxns)
 
-  const { data: monthData, cats: monthCats } = useMemo(
-    () => monthlyByCategory(store.transactions, store.categories, now, 6),
-    [store.transactions, store.categories]
+  const budgetStatuses = useMemo(
+    () => store.budgets.map((b) => budgetStatus(b, store.transactions, now)).sort((a, b) => b.ratio - a.ratio),
+    [store.budgets, store.transactions]
   )
-  const budgetLine = useMemo(() => monthlyBudgetTotal(store.budgets), [store.budgets])
 
   const recent = useMemo(
     () => [...store.transactions].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6),
@@ -100,75 +99,27 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
           ))}
         </div>
 
-        {/* Biểu đồ chi tiêu 6 tháng, chia màu theo danh mục */}
+        {/* Ngân sách tháng này */}
         <div className="card p-4 mt-5">
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="font-bold">Chi tiêu 6 tháng gần đây</h2>
-              <p className="text-xs text-muted">Màu = danh mục{budgetLine > 0 ? ' · đường nét đứt = hạn mức' : ''}</p>
-            </div>
-            <button onClick={() => onNavigate('reports')} className="text-xs text-brand-500 font-medium">
-              Chi tiết ›
+            <h2 className="font-bold">🎯 Ngân sách tháng này</h2>
+            <button onClick={() => onNavigate('budget')} className="text-xs text-brand-500 font-medium">
+              {budgetStatuses.length > 0 ? 'Quản lý ›' : ''}
             </button>
           </div>
-          <div className="h-48 -ml-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthData} margin={{ top: 20, right: 6, left: 0, bottom: 0 }}>
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#8b849c' }} axisLine={false} tickLine={false} />
-                <YAxis
-                  tickFormatter={(v) => formatShort(v)}
-                  tick={{ fontSize: 10, fill: '#8b849c' }}
-                  width={40}
-                  axisLine={false}
-                  tickLine={false}
-                  domain={[0, (dataMax: number) => Math.ceil((Math.max(dataMax, budgetLine) * 1.15) / 100000) * 100000]}
-                />
-                <Tooltip
-                  cursor={{ fill: '#f3e8ff' }}
-                  formatter={(v: number, name: string) => [formatVND(v), name]}
-                  labelFormatter={(l) => `Tháng ${String(l).replace('T', '')}`}
-                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(120,80,200,.15)', fontSize: 12 }}
-                />
-                {budgetLine > 0 && (
-                  <ReferenceLine
-                    y={budgetLine}
-                    stroke="#ef4444"
-                    strokeDasharray="5 4"
-                    strokeWidth={1.5}
-                    label={{ value: 'Hạn mức', position: 'insideTopRight', fontSize: 10, fill: '#ef4444' }}
-                  />
-                )}
-                {monthCats.map((c, i) => (
-                  <Bar
-                    key={c.id}
-                    dataKey={c.id}
-                    name={c.name}
-                    stackId="a"
-                    fill={c.color}
-                    radius={i === monthCats.length - 1 ? [6, 6, 0, 0] : [0, 0, 0, 0]}
-                    maxBarSize={40}
-                  >
-                    {i === monthCats.length - 1 && (
-                      <LabelList
-                        dataKey="total"
-                        position="top"
-                        formatter={(v: number) => (v > 0 ? formatShort(v) : '')}
-                        style={{ fontSize: 10, fill: '#8b849c', fontWeight: 600 }}
-                      />
-                    )}
-                  </Bar>
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          {/* Chú thích danh mục */}
-          {monthCats.length > 0 && (
-            <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3">
-              {monthCats.map((c) => (
-                <span key={c.id} className="flex items-center gap-1.5 text-xs text-muted">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c.color }} />
-                  {c.icon} {c.name}
-                </span>
+
+          {budgetStatuses.length === 0 ? (
+            <button
+              onClick={() => onNavigate('budget')}
+              className="w-full text-center py-4 text-sm text-muted active:opacity-70"
+            >
+              Chưa đặt hạn mức nào.
+              <span className="text-brand-500 font-medium"> Đặt hạn mức chi</span> cho danh mục để theo dõi ngay đây.
+            </button>
+          ) : (
+            <div className="space-y-4">
+              {budgetStatuses.map((s) => (
+                <BudgetProgressRow key={s.budget.id} status={s} category={categoryById(store.categories, s.budget.categoryId)} />
               ))}
             </div>
           )}

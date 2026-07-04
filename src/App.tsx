@@ -33,7 +33,7 @@ function Shell() {
       {screen === 'wallets' && <WalletsScreen onNavigate={setScreen} />}
       {screen === 'categories' && <CategoriesScreen onBack={() => setScreen('wallets')} />}
       {screen === 'scan' && <ScanScreen onBack={() => setScreen('home')} />}
-      {screen === 'budget' && <BudgetScreen onBack={() => setScreen('reports')} />}
+      {screen === 'budget' && <BudgetScreen onBack={() => setScreen('home')} />}
 
       {screen !== 'scan' && screen !== 'categories' && screen !== 'budget' && (
         <BottomNav current={screen} onNavigate={setScreen} onAdd={() => setAddOpen(true)} />
