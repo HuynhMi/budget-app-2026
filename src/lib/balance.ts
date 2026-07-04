@@ -18,11 +18,33 @@ export function walletBalance(
   return balance
 }
 
-/** Tổng số dư mọi ví */
+/** Tổng số dư mọi ví (tổng tài sản) */
 export function totalBalance(
   wallets: Wallet[],
   transactions: Transaction[],
   transfers: Transfer[]
 ): number {
   return wallets.reduce((sum, w) => sum + walletBalance(w, transactions, transfers), 0)
+}
+
+/** Tiền có thể chi tiêu = tổng các ví KHÔNG bị loại khỏi tổng */
+export function spendableBalance(
+  wallets: Wallet[],
+  transactions: Transaction[],
+  transfers: Transfer[]
+): number {
+  return wallets
+    .filter((w) => !w.excludeFromTotal)
+    .reduce((sum, w) => sum + walletBalance(w, transactions, transfers), 0)
+}
+
+/** Tổng các ví bị loại khỏi tổng (tiết kiệm & tài sản khác) */
+export function excludedBalance(
+  wallets: Wallet[],
+  transactions: Transaction[],
+  transfers: Transfer[]
+): number {
+  return wallets
+    .filter((w) => w.excludeFromTotal)
+    .reduce((sum, w) => sum + walletBalance(w, transactions, transfers), 0)
 }

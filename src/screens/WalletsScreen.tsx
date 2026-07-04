@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useStore } from '../state/store'
-import { walletBalance, totalBalance } from '../lib/balance'
+import { walletBalance, spendableBalance, excludedBalance } from '../lib/balance'
 import { formatVND, parseVND } from '../lib/money'
 import { todayISO } from '../lib/dates'
 import { Sheet } from '../components/Sheet'
@@ -13,7 +13,9 @@ export function WalletsScreen({ onNavigate }: { onNavigate: (s: Screen) => void 
   const store = useStore()
   const [editing, setEditing] = useState<Wallet | 'new' | null>(null)
   const [transferOpen, setTransferOpen] = useState(false)
-  const total = totalBalance(store.wallets, store.transactions, store.transfers)
+  const spendable = spendableBalance(store.wallets, store.transactions, store.transfers)
+  const savings = excludedBalance(store.wallets, store.transactions, store.transfers)
+  const hasExcluded = store.wallets.some((w) => w.excludeFromTotal)
 
   return (
     <div className="screen-pad pt-12">
@@ -23,7 +25,10 @@ export function WalletsScreen({ onNavigate }: { onNavigate: (s: Screen) => void 
           🏷️ Danh mục
         </button>
       </div>
-      <div className="text-muted text-sm mb-4">Tổng số dư: <b className="text-ink">{formatVND(total)}</b></div>
+      <div className="text-muted text-sm mb-4">
+        Có thể chi tiêu: <b className="text-ink">{formatVND(spendable)}</b>
+        {hasExcluded && <> · Tiết kiệm: <b className="text-ink">{formatVND(savings)}</b></>}
+      </div>
 
       <div className="grid gap-3">
         {store.wallets.map((w) => (
@@ -35,7 +40,11 @@ export function WalletsScreen({ onNavigate }: { onNavigate: (s: Screen) => void 
           >
             <div className="flex items-center justify-between">
               <div className="text-2xl">{w.icon}</div>
-              <div className="text-xs opacity-80">Sửa ›</div>
+              {w.excludeFromTotal ? (
+                <div className="text-[10px] bg-white/25 rounded-full px-2 py-0.5">🔒 Tiết kiệm</div>
+              ) : (
+                <div className="text-xs opacity-80">Sửa ›</div>
+              )}
             </div>
             <div className="mt-3 opacity-90">{w.name}</div>
             <div className="text-2xl font-extrabold">
@@ -141,6 +150,7 @@ function WalletEditor({ wallet, onClose }: { wallet: Wallet | null; onClose: () 
   const [icon, setIcon] = useState(wallet?.icon ?? WALLET_ICONS[0])
   const [color, setColor] = useState(wallet?.color ?? '#a855f7')
   const [balanceStr, setBalanceStr] = useState(wallet ? String(wallet.initialBalance) : '')
+  const [countInTotal, setCountInTotal] = useState(wallet ? !wallet.excludeFromTotal : true)
   const [error, setError] = useState('')
 
   const save = async () => {
@@ -150,7 +160,8 @@ function WalletEditor({ wallet, onClose }: { wallet: Wallet | null; onClose: () 
       name: name.trim(),
       icon,
       color,
-      initialBalance: parseVND(balanceStr)
+      initialBalance: parseVND(balanceStr),
+      excludeFromTotal: !countInTotal
     })
     onClose()
   }
@@ -178,7 +189,26 @@ function WalletEditor({ wallet, onClose }: { wallet: Wallet | null; onClose: () 
       <div className="mb-4"><IconPicker icons={WALLET_ICONS} value={icon} onChange={setIcon} /></div>
 
       <label className="block text-sm font-medium text-muted mb-2">Màu</label>
-      <div className="mb-5"><ColorPicker value={color} onChange={setColor} /></div>
+      <div className="mb-4"><ColorPicker value={color} onChange={setColor} /></div>
+
+      {/* Công tắc tính vào tổng */}
+      <button
+        type="button"
+        onClick={() => setCountInTotal((v) => !v)}
+        className="w-full flex items-center justify-between bg-white rounded-2xl px-4 py-3.5 mb-5"
+      >
+        <span className="text-left">
+          <span className="font-medium block">Tính vào tiền có thể chi tiêu</span>
+          <span className="text-xs text-muted">Tắt cho ví tiết kiệm/đầu tư để không tính vào tiền tiêu</span>
+        </span>
+        <span
+          className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${countInTotal ? 'bg-brand-500' : 'bg-brand-200'}`}
+        >
+          <span
+            className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${countInTotal ? 'left-[22px]' : 'left-0.5'}`}
+          />
+        </span>
+      </button>
 
       {error && <div className="text-pinkish-500 text-sm mb-3 text-center">{error}</div>}
       <button className="btn-primary mb-2" onClick={save}>Lưu</button>

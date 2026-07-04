@@ -77,6 +77,39 @@ export function buildSeries(
   return points
 }
 
+export interface MonthPoint {
+  label: string // 'T7'
+  year: number
+  month: number // 0..11
+  expense: number
+  income: number
+  isCurrent: boolean
+}
+
+/** Chi/thu N tháng gần nhất (tính cả tháng chứa `ref`), cũ -> mới */
+export function lastNMonths(transactions: Transaction[], ref: Date, n: number): MonthPoint[] {
+  const points: MonthPoint[] = []
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(ref.getFullYear(), ref.getMonth() - i, 1)
+    points.push({
+      label: MONTH_VI[d.getMonth()],
+      year: d.getFullYear(),
+      month: d.getMonth(),
+      expense: 0,
+      income: 0,
+      isCurrent: d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth()
+    })
+  }
+  for (const t of transactions) {
+    const d = parseISO(t.date)
+    const p = points.find((x) => x.year === d.getFullYear() && x.month === d.getMonth())
+    if (!p) continue
+    if (t.type === 'income') p.income += t.amount
+    else p.expense += t.amount
+  }
+  return points
+}
+
 /** Tổng thu & chi cho toàn bộ danh sách giao dịch đã lọc */
 export function sumTotals(transactions: Transaction[]): { income: number; expense: number } {
   let income = 0

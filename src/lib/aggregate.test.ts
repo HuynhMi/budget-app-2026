@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildSeries, sumTotals, byCategory } from './aggregate'
+import { buildSeries, sumTotals, byCategory, lastNMonths } from './aggregate'
 import type { Transaction, Category } from '../types'
 
 const cats: Category[] = [
@@ -42,5 +42,17 @@ describe('buildSeries', () => {
     expect(s).toHaveLength(31)
     expect(s[0].expense).toBe(350000) // ngày 1
     expect(s[14].income).toBe(1000000) // ngày 15
+  })
+})
+
+describe('lastNMonths', () => {
+  it('trả về N tháng, cũ -> mới, đánh dấu tháng hiện tại', () => {
+    const s = lastNMonths(txns, new Date(2026, 6, 15), 6) // T2..T7
+    expect(s).toHaveLength(6)
+    expect(s.map((p) => p.label)).toEqual(['T2', 'T3', 'T4', 'T5', 'T6', 'T7'])
+    expect(s[5].isCurrent).toBe(true)
+    expect(s[5].expense).toBe(350000) // tháng 7
+    expect(s[5].income).toBe(1000000)
+    expect(s[4].expense).toBe(40000) // tháng 6
   })
 })

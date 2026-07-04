@@ -1,16 +1,18 @@
 import { useMemo } from 'react'
-import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts'
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, LabelList } from 'recharts'
 import { useStore } from '../state/store'
-import { walletBalance, totalBalance } from '../lib/balance'
+import { walletBalance, spendableBalance, excludedBalance } from '../lib/balance'
 import { formatVND, formatShort } from '../lib/money'
-import { buildSeries, sumTotals } from '../lib/aggregate'
-import { startOfMonth, toISO, inRange, parseISO } from '../lib/dates'
+import { lastNMonths, sumTotals } from '../lib/aggregate'
+import { startOfMonth, inRange } from '../lib/dates'
 import { TxnRow, categoryById, walletById } from '../components/TxnRow'
 import type { Screen } from '../App'
 
 export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => void; onAdd: () => void }) {
   const store = useStore()
-  const total = totalBalance(store.wallets, store.transactions, store.transfers)
+  const spendable = spendableBalance(store.wallets, store.transactions, store.transfers)
+  const savings = excludedBalance(store.wallets, store.transactions, store.transfers)
+  const hasExcluded = store.wallets.some((w) => w.excludeFromTotal)
 
   const now = new Date()
   const monthTxns = useMemo(
@@ -22,7 +24,7 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
   )
   const { income, expense } = sumTotals(monthTxns)
 
-  const series = useMemo(() => buildSeries(store.transactions, 'month', now), [store.transactions])
+  const months = useMemo(() => lastNMonths(store.transactions, now, 6), [store.transactions])
 
   const recent = useMemo(
     () => [...store.transactions].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6),
@@ -49,8 +51,13 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
           </button>
         </div>
 
-        <div className="text-brand-700/70 text-sm">Tổng số dư</div>
-        <div className="text-4xl font-extrabold text-ink tracking-tight mt-1">{formatVND(total)}</div>
+        <div className="text-brand-700/70 text-sm">Có thể chi tiêu</div>
+        <div className="text-4xl font-extrabold text-ink tracking-tight mt-1">{formatVND(spendable)}</div>
+        {hasExcluded && (
+          <div className="text-xs text-brand-700/70 mt-1">
+            🔒 Tiết kiệm & tài sản khác: <b className="text-ink/80">{formatVND(savings)}</b>
+          </div>
+        )}
 
         <div className="flex gap-3 mt-5">
           <div className="flex-1 bg-white/70 backdrop-blur rounded-2xl px-4 py-3">
@@ -88,38 +95,40 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
           ))}
         </div>
 
-        {/* Biểu đồ */}
+        {/* Biểu đồ chi tiêu 6 tháng */}
         <div className="card p-4 mt-5">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="font-bold">Chi tiêu tháng này</h2>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="font-bold">Chi tiêu 6 tháng gần đây</h2>
+              <p className="text-xs text-muted">Cột hồng đậm là tháng này</p>
+            </div>
             <button onClick={() => onNavigate('reports')} className="text-xs text-brand-500 font-medium">
               Chi tiết ›
             </button>
           </div>
-          <div className="text-2xl font-extrabold text-pinkish-500">{formatVND(expense)}</div>
-          <div className="h-32 mt-2 -mx-1">
+          <div className="h-44 -ml-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={series} margin={{ top: 8, right: 6, left: 6, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ec4899" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#ec4899" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="label" hide />
+              <BarChart data={months} margin={{ top: 18, right: 6, left: 0, bottom: 0 }}>
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#8b849c' }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 10, fill: '#8b849c' }} width={40} axisLine={false} tickLine={false} />
                 <Tooltip
-                  formatter={(v: number) => formatVND(v)}
-                  labelFormatter={(l) => `Ngày ${l}`}
+                  cursor={{ fill: '#f3e8ff' }}
+                  formatter={(v: number) => [formatVND(v), 'Chi tiêu']}
+                  labelFormatter={(l) => `Tháng ${String(l).replace('T', '')}`}
                   contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(120,80,200,.15)', fontSize: 12 }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="expense"
-                  stroke="#ec4899"
-                  strokeWidth={2.5}
-                  fill="url(#expGrad)"
-                />
-              </AreaChart>
+                <Bar dataKey="expense" radius={[8, 8, 0, 0]} maxBarSize={38}>
+                  {months.map((m, i) => (
+                    <Cell key={i} fill={m.isCurrent ? '#ec4899' : '#f0abd0'} />
+                  ))}
+                  <LabelList
+                    dataKey="expense"
+                    position="top"
+                    formatter={(v: number) => (v > 0 ? formatShort(v) : '')}
+                    style={{ fontSize: 10, fill: '#8b849c', fontWeight: 600 }}
+                  />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

@@ -44,7 +44,8 @@ export function AddTransactionSheet({ open, onClose, prefill, editTxn, onSaved }
         setName(prefill?.name ?? '')
         setAmountStr(prefill?.amount ? String(prefill.amount) : '')
         setDate(todayISO())
-        setWalletId(store.wallets[0]?.id ?? '')
+        // Ưu tiên ví chi tiêu (không phải ví tiết kiệm) làm mặc định
+        setWalletId(store.wallets.find((w) => !w.excludeFromTotal)?.id ?? store.wallets[0]?.id ?? '')
       }
       setError('')
     }

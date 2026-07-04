@@ -7,6 +7,8 @@ export interface Wallet {
   color: string
   initialBalance: number
   createdAt: number
+  /** Nếu true: ví này (vd tiết kiệm) KHÔNG cộng vào "tiền có thể chi tiêu" */
+  excludeFromTotal?: boolean
 }
 
 export interface Category {

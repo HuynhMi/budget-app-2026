@@ -45,6 +45,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         icon: w.icon,
         color: w.color,
         initialBalance: w.initialBalance,
+        excludeFromTotal: w.excludeFromTotal,
         createdAt: Date.now()
       }
       await dbApi.putWallet(wallet)
