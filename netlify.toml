@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA / PWA: mọi đường dẫn chưa khớp file tĩnh -> index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
