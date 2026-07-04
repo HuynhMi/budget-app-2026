@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildSeries, sumTotals, byCategory, lastNMonths } from './aggregate'
+import { buildSeries, sumTotals, byCategory, lastNMonths, monthlyByCategory } from './aggregate'
 import type { Transaction, Category } from '../types'
 
 const cats: Category[] = [
@@ -44,6 +44,28 @@ describe('buildSeries', () => {
     expect(s[14].income).toBe(1000000) // ngày 15
   })
 })
+
+describe('monthlyByCategory', () => {
+  it('cột chồng theo danh mục, tổng đúng, cats sắp giảm dần', () => {
+    const { data, cats } = monthlyByCategory(txns, cats0(), new Date(2026, 6, 15), 6)
+    const jul = data[5]
+    expect(jul.isCurrent).toBe(true)
+    expect(jul.total).toBe(350000) // food 50k + shop 300k
+    expect(jul['food']).toBe(50000)
+    expect(jul['shop']).toBe(300000)
+    // tháng 6 chỉ có food 40k
+    expect(data[4]['food']).toBe(40000)
+    expect(data[4].total).toBe(40000)
+    // shop (300k) đứng trước food (90k)
+    expect(cats.map((c) => c.id)).toEqual(['shop', 'food'])
+  })
+})
+function cats0() {
+  return [
+    { id: 'food', name: 'Ăn uống', icon: '🍜', color: '#f472b6', type: 'expense' as const },
+    { id: 'shop', name: 'Mua sắm', icon: '🛍️', color: '#a855f7', type: 'expense' as const }
+  ]
+}
 
 describe('lastNMonths', () => {
   it('trả về N tháng, cũ -> mới, đánh dấu tháng hiện tại', () => {

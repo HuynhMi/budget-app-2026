@@ -110,6 +110,62 @@ export function lastNMonths(transactions: Transaction[], ref: Date, n: number): 
   return points
 }
 
+export interface StackedMonth {
+  label: string
+  year: number
+  month: number
+  isCurrent: boolean
+  total: number
+  [catId: string]: number | string | boolean
+}
+
+export interface CatMeta {
+  id: string
+  name: string
+  color: string
+  icon: string
+}
+
+/**
+ * Dữ liệu cột chồng theo danh mục cho N tháng gần nhất.
+ * data[i][catId] = tổng chi danh mục đó trong tháng i. Chỉ gồm danh mục có phát sinh.
+ */
+export function monthlyByCategory(
+  transactions: Transaction[],
+  categories: Category[],
+  ref: Date,
+  n: number
+): { data: StackedMonth[]; cats: CatMeta[] } {
+  const data: StackedMonth[] = []
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(ref.getFullYear(), ref.getMonth() - i, 1)
+    data.push({
+      label: MONTH_VI[d.getMonth()],
+      year: d.getFullYear(),
+      month: d.getMonth(),
+      isCurrent: d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth(),
+      total: 0
+    })
+  }
+  const catTotals = new Map<string, number>()
+  for (const t of transactions) {
+    if (t.type !== 'expense') continue
+    const d = parseISO(t.date)
+    const row = data.find((x) => x.year === d.getFullYear() && x.month === d.getMonth())
+    if (!row) continue
+    row[t.categoryId] = ((row[t.categoryId] as number) ?? 0) + t.amount
+    row.total += t.amount
+    catTotals.set(t.categoryId, (catTotals.get(t.categoryId) ?? 0) + t.amount)
+  }
+  const cats: CatMeta[] = [...catTotals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([id]) => {
+      const c = categories.find((x) => x.id === id)
+      return { id, name: c?.name ?? 'Khác', color: c?.color ?? '#c084fc', icon: c?.icon ?? '🏷️' }
+    })
+  return { data, cats }
+}
+
 /** Tổng thu & chi cho toàn bộ danh sách giao dịch đã lọc */
 export function sumTotals(transactions: Transaction[]): { income: number; expense: number } {
   let income = 0

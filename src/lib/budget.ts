@@ -41,6 +41,11 @@ export interface BudgetStatus {
   level: 'ok' | 'warn' | 'over'
 }
 
+/** Tổng hạn mức quy về mỗi tháng (hạn mức tuần nhân ~4). 0 nếu chưa đặt gì. */
+export function monthlyBudgetTotal(budgets: Budget[]): number {
+  return budgets.reduce((sum, b) => sum + b.limit * (b.period === 'week' ? 4 : 1), 0)
+}
+
 /** Trạng thái 1 hạn mức: đã chi, còn lại, tỉ lệ, mức cảnh báo */
 export function budgetStatus(budget: Budget, transactions: Transaction[], ref: Date): BudgetStatus {
   const spent = spentInPeriod(budget.categoryId, budget.period, transactions, ref)
