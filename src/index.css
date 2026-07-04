@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #1f1a2e;
+  background: #efe9fb;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Ẩn thanh cuộn ngang cho hàng chip lọc */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer components {
+  .app-shell {
+    @apply mx-auto max-w-[430px] min-h-full relative bg-[#f6f2ff];
+  }
+  .screen-pad {
+    @apply px-5 pb-28 pt-2;
+  }
+  .card {
+    @apply bg-white rounded-3xl shadow-card;
+  }
+  .chip {
+    @apply px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors;
+  }
+  .chip-on {
+    @apply bg-brand-500 text-white shadow-soft;
+  }
+  .chip-off {
+    @apply bg-white text-muted;
+  }
+  .field {
+    @apply w-full bg-brand-50 rounded-2xl px-4 py-3.5 text-ink outline-none border border-transparent focus:border-brand-300 transition-colors;
+  }
+  .btn-primary {
+    @apply w-full rounded-2xl py-3.5 font-semibold text-white bg-gradient-to-r from-brand-500 to-pinkish-500 shadow-soft active:scale-[0.99] transition-transform;
+  }
+  .btn-ghost {
+    @apply rounded-2xl py-3 px-4 font-medium text-brand-600 bg-brand-50 active:scale-[0.99] transition-transform;
+  }
+}
