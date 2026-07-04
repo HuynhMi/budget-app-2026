@@ -75,6 +75,16 @@ export const dbApi = {
   delBudget: (id: string) => del('budgets', id)
 }
 
+/** Xoá toàn bộ dữ liệu (mọi store). Lần load kế tiếp sẽ seed lại mặc định. */
+export async function resetAll(): Promise<void> {
+  const db = await getDB()
+  for (const store of ['wallets', 'categories', 'transactions', 'transfers', 'budgets'] as Stores[]) {
+    const tx = db.transaction(store, 'readwrite')
+    await tx.store.clear()
+    await tx.done
+  }
+}
+
 /** Xuất toàn bộ dữ liệu ra chuỗi JSON để backup */
 export async function exportJSON(): Promise<string> {
   const data = await loadAll()

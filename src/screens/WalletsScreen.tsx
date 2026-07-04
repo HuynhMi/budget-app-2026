@@ -5,7 +5,7 @@ import { formatVND, parseVND } from '../lib/money'
 import { todayISO } from '../lib/dates'
 import { Sheet } from '../components/Sheet'
 import { IconPicker, ColorPicker, WALLET_ICONS } from '../components/Pickers'
-import { exportJSON, importJSON } from '../db'
+import { exportJSON, importJSON, resetAll } from '../db'
 import type { Wallet } from '../types'
 import type { Screen } from '../App'
 
@@ -119,6 +119,17 @@ function BackupSection() {
           e.target.value = ''
         }}
       />
+      <button
+        onClick={async () => {
+          if (!confirm('Xoá TOÀN BỘ dữ liệu (ví, giao dịch, danh mục, ngân sách) và tạo lại mặc định? Không thể hoàn tác.')) return
+          await resetAll()
+          await store.reload()
+          setMsg('Đã đặt lại dữ liệu về mặc định.')
+        }}
+        className="w-full mt-2 py-2.5 text-sm text-pinkish-500 font-medium"
+      >
+        🗑️ Đặt lại dữ liệu về mặc định
+      </button>
       {msg && <div className="text-xs text-brand-500 mt-2">{msg}</div>}
     </div>
   )

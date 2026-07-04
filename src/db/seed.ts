@@ -1,5 +1,8 @@
 import type { Wallet, Category } from '../types'
-import { uid } from '../lib/uid'
+
+// Dùng ID CỐ ĐỊNH cho dữ liệu mặc định để việc seed là idempotent:
+// nếu seed chạy nhiều lần (vd StrictMode gọi effect 2 lần), put() cùng key
+// sẽ ghi đè thay vì tạo bản ghi trùng.
 
 export function defaultCategories(): Category[] {
   const expense: Array<[string, string, string]> = [
@@ -19,14 +22,14 @@ export function defaultCategories(): Category[] {
     ['Khác', '💰', '#84cc16']
   ]
   return [
-    ...expense.map(([name, icon, color]) => ({ id: uid(), name, icon, color, type: 'expense' as const })),
-    ...income.map(([name, icon, color]) => ({ id: uid(), name, icon, color, type: 'income' as const }))
+    ...expense.map(([name, icon, color], i) => ({ id: `cat-e-${i}`, name, icon, color, type: 'expense' as const })),
+    ...income.map(([name, icon, color], i) => ({ id: `cat-i-${i}`, name, icon, color, type: 'income' as const }))
   ]
 }
 
 export function defaultWallets(): Wallet[] {
   return [
-    { id: uid(), name: 'Tiền mặt', icon: '💵', color: '#a855f7', initialBalance: 0, createdAt: Date.now() },
-    { id: uid(), name: 'Ngân hàng', icon: '🏦', color: '#ec4899', initialBalance: 0, createdAt: Date.now() }
+    { id: 'wallet-cash', name: 'Tiền mặt', icon: '💵', color: '#a855f7', initialBalance: 0, createdAt: 0 },
+    { id: 'wallet-bank', name: 'Ngân hàng', icon: '🏦', color: '#ec4899', initialBalance: 0, createdAt: 0 }
   ]
 }
