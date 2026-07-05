@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import type { AppData, Wallet, Category, Transaction, Transfer, Budget } from '../types'
+import type { AppData, Wallet, Category, Transaction, Transfer, Budget, SavingsSweep } from '../types'
 import { loadAll, dbApi } from '../db'
 import { uid } from '../lib/uid'
 
@@ -17,12 +17,13 @@ interface Store extends AppData {
   removeTransfer: (id: string) => Promise<void>
   saveBudget: (b: Omit<Budget, 'id'> & { id?: string }) => Promise<void>
   removeBudget: (id: string) => Promise<void>
+  recordSweep: (s: Omit<SavingsSweep, 'id' | 'createdAt'> & { id?: string }) => Promise<void>
 }
 
 const StoreContext = createContext<Store | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<AppData>({ wallets: [], categories: [], transactions: [], transfers: [], budgets: [] })
+  const [data, setData] = useState<AppData>({ wallets: [], categories: [], transactions: [], transfers: [], budgets: [], savingsSweeps: [] })
   const [ready, setReady] = useState(false)
 
   const reload = async () => {
@@ -127,6 +128,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     removeBudget: async (id) => {
       await dbApi.delBudget(id)
+      await reload()
+    },
+    recordSweep: async (s) => {
+      const sweep: SavingsSweep = {
+        id: s.id ?? uid(),
+        month: s.month,
+        amount: s.amount,
+        fromWalletId: s.fromWalletId,
+        toWalletId: s.toWalletId,
+        transferId: s.transferId,
+        status: s.status,
+        createdAt: Date.now()
+      }
+      await dbApi.putSweep(sweep)
       await reload()
     }
   }

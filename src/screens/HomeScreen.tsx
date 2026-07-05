@@ -1,12 +1,14 @@
 import { useMemo } from 'react'
 import { useStore } from '../state/store'
 import { walletBalance, spendableBalance, excludedBalance } from '../lib/balance'
-import { formatVND } from '../lib/money'
+import { formatVND, formatShort } from '../lib/money'
 import { sumTotals } from '../lib/aggregate'
-import { budgetStatus } from '../lib/budget'
+import { budgetStatus, weeklyPacing } from '../lib/budget'
+import { monthlySurplus, pendingSweep } from '../lib/savings'
 import { startOfMonth, inRange } from '../lib/dates'
 import { TxnRow, categoryById, walletById } from '../components/TxnRow'
 import { BudgetProgressRow } from '../components/BudgetProgressRow'
+import { SavingsSweepBanner } from '../components/SavingsSweepBanner'
 import type { Screen } from '../App'
 
 export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => void; onAdd: () => void }) {
@@ -28,6 +30,15 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
   const budgetStatuses = useMemo(
     () => store.budgets.map((b) => budgetStatus(b, store.transactions, now)).sort((a, b) => b.ratio - a.ratio),
     [store.budgets, store.transactions]
+  )
+
+  const savedThisMonth = useMemo(
+    () => monthlySurplus(store.budgets, store.transactions, now),
+    [store.budgets, store.transactions]
+  )
+  const sweep = useMemo(
+    () => pendingSweep(now, store.budgets, store.transactions, store.savingsSweeps),
+    [store.budgets, store.transactions, store.savingsSweeps]
   )
 
   const recent = useMemo(
@@ -76,6 +87,9 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
       </div>
 
       <div className="screen-pad">
+        {/* Chốt hũ tiết kiệm cuối tháng */}
+        {sweep && <SavingsSweepBanner month={sweep.month} amount={sweep.amount} onNavigate={onNavigate} />}
+
         {/* Ví */}
         <div className="flex items-center justify-between mt-5 mb-3">
           <h2 className="font-bold text-lg">Ví của tôi</h2>
@@ -124,10 +138,17 @@ export function HomeScreen({ onNavigate, onAdd }: { onNavigate: (s: Screen) => v
                     key={s.budget.id}
                     status={s}
                     category={categoryById(store.categories, s.budget.categoryId)}
+                    pacing={s.budget.period === 'month' ? weeklyPacing(s.budget, store.transactions, now) : undefined}
                     compact
                   />
                 ))}
               </div>
+              {savedThisMonth > 0 && (
+                <div className="mt-3 pt-3 border-t border-brand-50 flex items-center justify-between">
+                  <span className="text-xs text-muted">🐷 Dự kiến tiết kiệm tháng này</span>
+                  <span className="font-bold text-green-600">{formatShort(savedThisMonth)}</span>
+                </div>
+              )}
               {budgetStatuses.length > 4 && (
                 <button
                   onClick={() => onNavigate('budget')}

@@ -4,7 +4,7 @@ import { Sheet } from '../components/Sheet'
 import { BudgetProgressRow } from '../components/BudgetProgressRow'
 import { MoneyInput } from '../components/MoneyInput'
 import { formatVND, parseVND } from '../lib/money'
-import { budgetStatus } from '../lib/budget'
+import { budgetStatus, weeklyPacing } from '../lib/budget'
 import type { Budget, BudgetPeriod, Category } from '../types'
 
 export function BudgetScreen({ onBack }: { onBack: () => void }) {
@@ -47,7 +47,11 @@ export function BudgetScreen({ onBack }: { onBack: () => void }) {
               onClick={() => setEditing(s.budget)}
               className="card p-4 w-full text-left active:scale-[0.99] transition-transform"
             >
-              <BudgetProgressRow status={s} category={catName(s.budget.categoryId)} />
+              <BudgetProgressRow
+                status={s}
+                category={catName(s.budget.categoryId)}
+                pacing={s.budget.period === 'month' ? weeklyPacing(s.budget, store.transactions, now) : undefined}
+              />
             </button>
           ))}
         </div>

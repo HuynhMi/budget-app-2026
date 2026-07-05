@@ -1,6 +1,22 @@
 import type { Transaction, Budget, BudgetPeriod } from '../types'
 import { startOfWeek, startOfMonth, parseISO } from './dates'
 
+const DAY = 86400000
+function daysBetween(a: Date, b: Date): number {
+  return Math.round((b.getTime() - a.getTime()) / DAY)
+}
+function sumExpense(categoryId: string, txns: Transaction[], from: Date, to: Date): number {
+  const f = from.getTime()
+  const t = to.getTime()
+  let sum = 0
+  for (const tx of txns) {
+    if (tx.type !== 'expense' || tx.categoryId !== categoryId) continue
+    const d = parseISO(tx.date).getTime()
+    if (d >= f && d <= t) sum += tx.amount
+  }
+  return sum
+}
+
 /** Ngày bắt đầu kỳ hiện tại theo period, tính từ mốc `ref` */
 export function periodStart(period: BudgetPeriod, ref: Date): Date {
   return period === 'week' ? startOfWeek(ref) : startOfMonth(ref)
@@ -44,6 +60,40 @@ export interface BudgetStatus {
 /** Tổng hạn mức quy về mỗi tháng (hạn mức tuần nhân ~4). 0 nếu chưa đặt gì. */
 export function monthlyBudgetTotal(budgets: Budget[]): number {
   return budgets.reduce((sum, b) => sum + b.limit * (b.period === 'week' ? 4 : 1), 0)
+}
+
+export interface WeeklyPacing {
+  /** Được phép tiêu trong tuần này (= phần hạn mức tháng còn lại ÷ số tuần còn lại) */
+  allowanceThisWeek: number
+  /** Đã tiêu trong tuần này (phần nằm trong tháng) */
+  spentThisWeek: number
+  /** Còn có thể tiêu tuần này (âm = đã vượt nhịp) */
+  remainingThisWeek: number
+  /** Số tuần còn lại trong tháng (kể cả tuần hiện tại) */
+  weeksLeft: number
+}
+
+/**
+ * Chia hạn mức THÁNG thành nhịp theo tuần, dư dồn sang tuần sau.
+ * Số tuần còn lại = số mốc Thứ 2 từ tuần hiện tại tới cuối tháng → mỗi tuần trôi qua giảm đúng 1,
+ * nên tiêu ít tuần này thì tuần sau tự được nhiều hơn.
+ */
+export function weeklyPacing(budget: Budget, transactions: Transaction[], ref: Date): WeeklyPacing {
+  const monthStart = startOfMonth(ref)
+  const monthEnd = periodEnd('month', ref)
+  const rawWeekStart = startOfWeek(ref)
+  const weekStart = rawWeekStart < monthStart ? monthStart : rawWeekStart
+  const rawWeekEnd = new Date(rawWeekStart.getFullYear(), rawWeekStart.getMonth(), rawWeekStart.getDate() + 6)
+  const weekEnd = rawWeekEnd > monthEnd ? monthEnd : rawWeekEnd
+
+  const dayBeforeWeek = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() - 1)
+  const spentBeforeWeek = weekStart > monthStart ? sumExpense(budget.categoryId, transactions, monthStart, dayBeforeWeek) : 0
+  const spentThisWeek = sumExpense(budget.categoryId, transactions, weekStart, weekEnd)
+
+  const weeksLeft = Math.floor(daysBetween(rawWeekStart, monthEnd) / 7) + 1
+  const remainingMonth = budget.limit - spentBeforeWeek
+  const allowanceThisWeek = remainingMonth / weeksLeft
+  return { allowanceThisWeek, spentThisWeek, remainingThisWeek: allowanceThisWeek - spentThisWeek, weeksLeft }
 }
 
 /** Trạng thái 1 hạn mức: đã chi, còn lại, tỉ lệ, mức cảnh báo */

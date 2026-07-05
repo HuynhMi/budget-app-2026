@@ -52,10 +52,23 @@ export interface Budget {
   limit: number
 }
 
+/** Lần "chốt hũ tiết kiệm" cuối tháng: đã chuyển phần dư vào ví tiết kiệm, hoặc bỏ qua */
+export interface SavingsSweep {
+  id: string
+  month: string // 'YYYY-MM' của tháng được chốt
+  amount: number // phần dư đã chốt
+  fromWalletId?: string // chỉ khi status='done'
+  toWalletId?: string
+  transferId?: string // Transfer đã tạo (truy vết)
+  status: 'done' | 'skipped'
+  createdAt: number
+}
+
 export interface AppData {
   wallets: Wallet[]
   categories: Category[]
   transactions: Transaction[]
   transfers: Transfer[]
   budgets: Budget[]
+  savingsSweeps: SavingsSweep[]
 }
