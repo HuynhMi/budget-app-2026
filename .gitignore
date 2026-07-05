@@ -5,3 +5,10 @@ dist
 qa.mjs
 qa-*.png
 qa-budget.mjs
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
